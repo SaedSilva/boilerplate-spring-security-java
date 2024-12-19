@@ -9,17 +9,15 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-//Anotações que ficam acima da declaração da classe
-@Entity // Indica que a classe é uma entidade do banco de dados
-@Table(name = "tb_user") // Indica o nome da tabela no banco de dados
+
+@Entity
+@Table(name = "tb_user")
 public class User implements UserDetails {
 
-    //Anotações que ficam acima da declaração dos atributos
-    @Id // Indica que o atributo é uma chave primária
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // Indica que o valor do atributo é gerado automaticamente pelo banco de dados
     private Long id;
-    @Column(unique = true) // Indica que o atributo é único
+    @Column(unique = true)
     private String email;
     private String password;
 
