@@ -68,14 +68,11 @@ public class CustomPasswordAuthenticationConverter implements AuthenticationConv
     }
 
     private static MultiValueMap<String, String> getParameters(HttpServletRequest request) {
-
         Map<String, String[]> parameterMap = request.getParameterMap();
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>(parameterMap.size());
         parameterMap.forEach((key, values) -> {
-            if (values.length > 0) {
-                for (String value : values) {
-                    parameters.add(key, value);
-                }
+            for (String value : values) {
+                parameters.add(key, value);
             }
         });
         return parameters;
