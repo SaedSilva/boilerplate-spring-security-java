@@ -7,6 +7,13 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.OAuthFlows;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -56,6 +63,9 @@ public class AuthorizationServerConfig {
 
     @Value("${security.jwt.duration}")
     private Integer jwtDurationSeconds;
+
+    @Value("${security.token.endpoint}")
+    private String tokenEndpoint = "/login";
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -126,8 +136,9 @@ public class AuthorizationServerConfig {
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
+
         return AuthorizationServerSettings.builder()
-                .tokenEndpoint("/login")
+                .tokenEndpoint(tokenEndpoint)
                 .build();
     }
 
@@ -166,6 +177,25 @@ public class AuthorizationServerConfig {
         RSAKey rsaKey = generateRsa();
         JWKSet jwkSet = new JWKSet(rsaKey);
         return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
+    }
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .components(new Components()
+                        .addSecuritySchemes("basicAuth", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("basic"))
+                        .addSecuritySchemes("bearerAuth", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT"))
+                        .addSecuritySchemes("oauth2Password", new SecurityScheme()
+                                .type(SecurityScheme.Type.OAUTH2)
+                                .flows(new io.swagger.v3.oas.models.security.OAuthFlows()
+                                        .password(new io.swagger.v3.oas.models.security.OAuthFlow()
+                                                .tokenUrl(tokenEndpoint)))));
+
     }
 
     private static RSAKey generateRsa() {
